@@ -10,7 +10,7 @@ from builtins import range
 
 import sys
 import numpy as np
-import fsps
+import pickle
 from cloudyfsps.ASCIItools import (writeASCII, compileASCII, checkCompiled, compiledExists)
 
 # this code snippet goes through every step needed
@@ -40,30 +40,17 @@ def mist_ascii(fileout, **kwargs):
     # change these parameters to modify the ionizing source grid
     # default mode is to produce an ascii grid in age and Z,
     # though different variables and more dimensions are possible.
-    sp_dict = dict(zcontinuous=1,
-                   imf_type=2,
-                   sfh=0,
-                   const=0.0,
-                   sf_start=0.0)
-    sp = fsps.StellarPopulation(**sp_dict)
-    # all ages and Zs
-    ages = 10.**sp.log_age
-    logZs = np.log10(old_div(sp.zlegend,zsun))
-    modpars = [(age, logZ) for age in ages for logZ in logZs]
-    lam = sp.wavelengths
-    all_fluxs = []
-    for logZ in logZs:
-        sp.params['logzsol'] = logZ
-        all_fluxs.append(sp.get_spectrum()[1]) #lsun per hz
-    nmod = len(modpars)
-    # flatten flux for writing
-    flat_flux = np.array([all_fluxs[j][i]
-                          for i in range(len(ages))
-                          for j in range(len(logZs))])
+    # Created this file with /science/projects/215_project/00_spectral_templates/fsps/create_SSP_MIST_C3K_pckl.py
+    fsps_mist_c3k = pickle.load(open(
+        '/science/projects/215_project/00_spectral_templates/fsps/'
+        'SSP_MIST_C3K_Salpeter.pckl', 'rb'))
     # this function is flexible, ndim can be 3/4/n.
     # in this example, however, ndim is 2 (age, logz).
+    lam = fsps_mist_c3k['wave']
+    flat_flux = fsps_mist_c3k['flat_flux']
+    modpars = fsps_mist_c3k['modpars']
     writeASCII(fileout, lam, flat_flux, modpars,
-               nx=len(lam), ndim=2, npar=2, nmod=nmod)
+               nx=len(lam), ndim=2, npar=2, nmod=len(modpars))
     return
 #---------------------------------------------------------------------
 # ASCII FILE: WRITE AND COMPILE
@@ -71,7 +58,7 @@ def mist_ascii(fileout, **kwargs):
 # assumes you have $CLOUDY_EXE and $CLOUDY_DATA_PATH set as sys vars.
 
 # name of ascii file
-ascii_file = 'FSPS_MIST_SSP.ascii'
+ascii_file = 'FSPS_MIST_C3K_SSP.ascii'
 
 # the ascii file takes a while to generate, so if an already-compiled
 # version exists, the code will not overwrite it.
