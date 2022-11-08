@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 from __future__ import (division, print_function, absolute_import, unicode_literals)
 from builtins import range
 
+import os
 import sys
 import numpy as np
 import fsps
@@ -57,6 +58,7 @@ if not compiledExists(ascii_file):
 #---------------------------------------------------------------------
 # local folder to read and write *.in, *.out files
 mod_dir = './output_mist_c3k_ssp/'
+os.makedirs(mod_dir, exist_ok=True)
 mod_prefix = 'ZAU'
 
 # GRID PARAMETERS FOR CLOUDY RUN
